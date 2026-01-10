@@ -24,3 +24,9 @@ The app supports **light & dark themes** and follows best Flutter development pr
 - **Material 3**
 - **UUID**
 - **Intl**
+
+---
+
+##Output
+https://github.com/user-attachments/assets/4bd62cd2-a2dd-47ad-8f37-484c73bf8cb7
+
