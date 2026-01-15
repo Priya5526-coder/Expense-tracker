@@ -1,16 +1,32 @@
-# expense_tracker
+# 💰 Expense Tracker App (Flutter)
 
-A new Flutter project.
+A modern **Flutter Expense Tracker application** built using **Material 3**, designed to help users manage and track daily expenses with a clean and responsive UI.  
+The app supports **light & dark themes** and follows best Flutter development practices.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## 🚀 Features
 
-A few resources to get you started if this is your first Flutter project:
+- 📊 Add and view daily expenses
+- 🌓 Light & Dark theme support (system-based)
+- 🎨 Material 3 design system
+- 🧾 Clean and user-friendly UI
+- 🆔 Unique expense IDs using UUID
+- 📅 Date formatting with Intl
+- 📱 Responsive layout
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 🛠 Tech Stack
+
+- **Flutter** (Latest Stable)
+- **Dart 3.x**
+- **Material 3**
+- **UUID**
+- **Intl**
+
+---
+
+##Output
+https://github.com/user-attachments/assets/4bd62cd2-a2dd-47ad-8f37-484c73bf8cb7
+
