@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/widgets/expenses.dart';
+import 'screens/auth_screen.dart';
+import 'screens/welcome_screen.dart';
+
 
 final kColorScheme = ColorScheme.fromSeed(
   seedColor: const Color.fromARGB(255, 96, 59, 181),
@@ -64,7 +67,8 @@ void main() {
         ),
       ),
 
-      home: const Expenses(),
+      // 🔐 Auth first
+      home: const WelcomeScreen(),
     ),
   );
 }
