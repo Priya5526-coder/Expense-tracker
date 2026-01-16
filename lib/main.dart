@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:expense_tracker/widgets/expenses.dart';
-import 'screens/auth_screen.dart';
-import 'screens/welcome_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
 
+import 'firebase_options.dart';
+import 'screens/auth_wrapped.dart';
 
+// 🎨 Color Schemes
 final kColorScheme = ColorScheme.fromSeed(
   seedColor: const Color.fromARGB(255, 96, 59, 181),
 );
@@ -13,9 +14,22 @@ final kDarkColorScheme = ColorScheme.fromSeed(
   seedColor: const Color.fromARGB(255, 5, 99, 125),
 );
 
-void main() {
-  runApp(
-    MaterialApp(
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.system,
 
@@ -67,8 +81,8 @@ void main() {
         ),
       ),
 
-      // 🔐 Auth first
-      home: const WelcomeScreen(),
-    ),
-  );
+      // 🔐 Auth Wrapper (AUTO LOGIN)
+      home: const AuthWrapper(),
+    );
+  }
 }

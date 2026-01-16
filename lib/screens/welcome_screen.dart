@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'login_screen.dart';
-import 'signup_screen.dart';
+import 'auth_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -56,7 +55,7 @@ class WelcomeScreen extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => const LoginScreen(),
+                              builder: (_) => const AuthScreen(),
                             ),
                           );
                         },
@@ -69,12 +68,11 @@ class WelcomeScreen extends StatelessWidget {
 
                     const SizedBox(height: 12),
 
-                    // 📝 REGISTER BUTTON (FIXED)
+                    // 📝 REGISTER BUTTON
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton(
                         style: OutlinedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
                           foregroundColor: Colors.white,
                           side: const BorderSide(
                             color: Colors.white,
@@ -86,7 +84,7 @@ class WelcomeScreen extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => const SignupScreen(),
+                              builder: (_) => const AuthScreen(),
                             ),
                           );
                         },

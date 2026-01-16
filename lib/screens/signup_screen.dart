@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:expense_tracker/widgets/expenses.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -9,114 +10,142 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
-  final _usernameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
+  final _username = TextEditingController();
+  final _email = TextEditingController();
+  final _password = TextEditingController();
+  final _confirmPassword = TextEditingController();
 
-  void _register() {
-    final username = _usernameController.text.trim();
-    final email = _emailController.text.trim();
-    final password = _passwordController.text.trim();
-    final confirmPassword = _confirmPasswordController.text.trim();
+  bool _loading = false;
 
-    // ❌ Validation: empty fields
-    if (username.isEmpty ||
-        email.isEmpty ||
-        password.isEmpty ||
-        confirmPassword.isEmpty) {
+  Future<void> _register() async {
+    if (_username.text.trim().isEmpty ||
+        _email.text.trim().isEmpty ||
+        _password.text.trim().isEmpty ||
+        _confirmPassword.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please fill all details")),
       );
       return;
     }
 
-    // ❌ Password mismatch
-    if (password != confirmPassword) {
+    if (_password.text != _confirmPassword.text) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Passwords do not match")),
       );
       return;
     }
 
-    // ✅ Registration successful
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Registration successful")),
-    );
+    setState(() => _loading = true);
 
-    // ✅ OPEN HOME PAGE (Expenses)
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const Expenses(),
-      ),
-    );
+    try {
+      final userCred =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _email.text.trim(),
+        password: _password.text.trim(),
+      );
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userCred.user!.uid)
+          .set({
+        'username': _username.text.trim(),
+        'email': _email.text.trim(),
+        'createdAt': Timestamp.now(),
+      });
+
+      // ✅ No navigation needed
+      // AuthWrapper will automatically open Expenses
+    } on FirebaseAuthException catch (e) {
+      String msg = "Registration failed";
+
+      if (e.code == 'email-already-in-use') {
+        msg = "Email already registered";
+      } else if (e.code == 'weak-password') {
+        msg = "Password must be at least 6 characters";
+      } else if (e.code == 'invalid-email') {
+        msg = "Invalid email address";
+      }
+
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(msg)));
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
   @override
   void dispose() {
-    _usernameController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
+    _username.dispose();
+    _email.dispose();
+    _password.dispose();
+    _confirmPassword.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Register")),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            // 👤 Username
-            TextField(
-              controller: _usernameController,
-              decoration: const InputDecoration(labelText: "Username"),
+Widget build(BuildContext context) {
+  return Scaffold(
+    resizeToAvoidBottomInset: true,
+    body: SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(height: 40),
+
+          const Text(
+            "Register",
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+
+          const SizedBox(height: 24),
+
+          TextField(
+            controller: _username,
+            decoration: const InputDecoration(labelText: "Username"),
+          ),
+          const SizedBox(height: 12),
+
+          TextField(
+            controller: _email,
+            keyboardType: TextInputType.emailAddress,
+            decoration: const InputDecoration(labelText: "Email"),
+          ),
+          const SizedBox(height: 12),
+
+          TextField(
+            controller: _password,
+            obscureText: true,
+            decoration: const InputDecoration(labelText: "Password"),
+          ),
+          const SizedBox(height: 12),
+
+          TextField(
+            controller: _confirmPassword,
+            obscureText: true,
+            decoration:
+                const InputDecoration(labelText: "Confirm Password"),
+          ),
+          const SizedBox(height: 24),
+
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton(
+              onPressed: _loading ? null : _register,
+              child: _loading
+                  ? const CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    )
+                  : const Text("Register"),
             ),
+          ),
 
-            const SizedBox(height: 15),
-
-            // 📧 Email
-            TextField(
-              controller: _emailController,
-              keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(labelText: "Email"),
-            ),
-
-            const SizedBox(height: 15),
-
-            // 🔑 Password
-            TextField(
-              controller: _passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(labelText: "Password"),
-            ),
-
-            const SizedBox(height: 15),
-
-            // 🔑 Confirm Password
-            TextField(
-              controller: _confirmPasswordController,
-              obscureText: true,
-              decoration:
-                  const InputDecoration(labelText: "Confirm Password"),
-            ),
-
-            const SizedBox(height: 30),
-
-            // 🔘 Register Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _register,
-                child: const Text("Register"),
-              ),
-            ),
-          ],
-        ),
+          const SizedBox(height: 20),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:expense_tracker/widgets/expenses.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -9,37 +10,61 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  void _login() {
-    final username = _usernameController.text.trim();
+  bool _isLoading = false;
+
+  Future<void> _login() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
     // ❌ Validation
-    if (username.isEmpty || email.isEmpty || password.isEmpty) {
+    if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please fill all details"),
-        ),
+        const SnackBar(content: Text("Please fill all details")),
       );
       return;
     }
 
-    // ✅ Login success (after validation)
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const Expenses(),
-      ),
-    );
+    setState(() => _isLoading = true);
+
+    try {
+      // 🔐 Firebase Login (REAL SECURITY)
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      // ✅ Login success
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const Expenses()),
+      );
+    } on FirebaseAuthException catch (e) {
+      String message = "Login failed";
+
+      if (e.code == 'user-not-found') {
+        message = "User not registered";
+      } else if (e.code == 'wrong-password') {
+        message = "Wrong password";
+      } else if (e.code == 'invalid-email') {
+        message = "Invalid email address";
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
   void dispose() {
-    _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -53,14 +78,6 @@ class _LoginScreenState extends State<LoginScreen> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // 👤 Username
-            TextField(
-              controller: _usernameController,
-              decoration: const InputDecoration(labelText: "Username"),
-            ),
-
-            const SizedBox(height: 15),
-
             // 📧 Email
             TextField(
               controller: _emailController,
@@ -82,9 +99,15 @@ class _LoginScreenState extends State<LoginScreen> {
             // 🔘 Login Button
             SizedBox(
               width: double.infinity,
+              height: 48,
               child: ElevatedButton(
-                onPressed: _login,
-                child: const Text("Login"),
+                onPressed: _isLoading ? null : _login,
+                child: _isLoading
+                    ? const CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      )
+                    : const Text("Login"),
               ),
             ),
           ],
