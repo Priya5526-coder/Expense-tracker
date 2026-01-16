@@ -33,6 +33,7 @@ migrate_working_dir/
 /build/
 /coverage/
 
+
 # Symbolication related
 app.*.symbols
 
@@ -43,3 +44,13 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Flutter metadata
+.metadata
+
+# Firebase secrets
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+
+# VS Code
+.vscode/
